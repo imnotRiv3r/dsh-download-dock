@@ -1,7 +1,7 @@
 <p align="right"><b>English</b> · <a href="README.zh.md">中文</a></p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/banner.svg" width="100%" alt="dsh-download-dock — live download cards in the corner of the DeepSeek Harness UI">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/banner.svg" width="100%" alt="dsh-transfer-dock — live download cards in the corner of the DeepSeek Harness UI">
 </p>
 
 <p align="center">
@@ -9,19 +9,19 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A520-3c873a?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js >= 20">
   <img src="https://img.shields.io/badge/dsh-0.2.0--rc.1%2B-7c5cff?style=flat-square" alt="DeepSeek Harness >= 0.2.0-rc.1">
   <img src="https://img.shields.io/badge/tests-smoke%20%C2%B7%20offline-22d3ee?style=flat-square" alt="Tests: offline smoke">
-  <img src="https://img.shields.io/badge/version-0.1.0-6d4aff?style=flat-square" alt="Version 0.1.0">
+  <img src="https://img.shields.io/badge/version-0.1.1-6d4aff?style=flat-square" alt="Version 0.1.1">
 </p>
 
 <p align="center">
   <b>A background download shouldn't be one word: "Running".</b><br>
-  <sub>dsh-download-dock grows a live card in the bottom-right corner: file, progress, bytes, speed and ETA.</sub>
+  <sub>dsh-transfer-dock grows a live card in the bottom-right corner: file, progress, bytes, speed and ETA.</sub>
 </p>
 
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/card-fill.png" width="46%" alt="A card with a known total: 32% · curl">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/card-stripes.png" width="46%" alt="An indeterminate card: moving stripes, bytes written">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/card-fill.png" width="46%" alt="A card with a known total: 32% · curl">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/card-stripes.png" width="46%" alt="An indeterminate card: moving stripes, bytes written">
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 > You start a 2 GB model download in Harness and it goes to the background. The corner of the UI says nothing; the job row says "Running".
 > You can't tell whether it's downloading at full speed, stuck on DNS, or already dead.
 >
-> dsh-download-dock turns those forty seconds into one card: **file name, 32%, 4.14 MB / 12.9 MB, 148 KB/s, 59s left**.
+> dsh-transfer-dock turns those forty seconds into one card: **file name, 32%, 4.14 MB / 12.9 MB, 148 KB/s, 59s left**.
 > No second window, no wrapped commands, no takeover — it observes and draws the result where you are already looking.
 
 ## Contents
@@ -59,7 +59,7 @@
 
 Harness pushes download commands into background jobs (`run_in_background: true`) so they don't block the turn. The cost: the UI keeps a single status row, and the next real signal is a completion notice a dozen seconds later. Everything in between is invisible.
 
-dsh-download-dock fills that gap, and it **only observes**:
+dsh-transfer-dock fills that gap, and it **only observes**:
 
 | It does | It doesn't |
 |---|---|
@@ -77,7 +77,7 @@ A card is 366 px wide (clamped to `100vw - 36px` on narrow screens), fixed 18 px
 | Part | Content | Notes |
 |---|---|---|
 | Tool badge | `git` / `py` / `npm` / `a2` / `c` / `w` / `web` / `app` / `rs` / `go` / `dk` | Derived from the detected tool |
-| Title | File, repo or package name | e.g. `numpy-2.2.6-cp310-win_amd64.whl`, `dsh-download-dock`, `lodash`; falls back to the first 60 characters of the command |
+| Title | File, repo or package name | e.g. `numpy-2.2.6-cp310-win_amd64.whl`, `dsh-transfer-dock`, `lodash`; falls back to the first 60 characters of the command |
 | Subtitle | Byte progress or status text | `4.14 MB / 12.9 MB`, `12.4 MB written`, `Completed`, `Download failed`, `Cancelled`, `Stopping…` |
 | Bar | Filled bar or moving stripes | Filled when the total is known; stripes otherwise (see [Stripes are not a bug](#stripes-are-not-a-bug)) |
 | Bottom left | Percentage + tool | The tool alone means indeterminate |
@@ -101,7 +101,7 @@ The `✕` button only removes the card from the current page — **it never stop
 The plugin is split into two halves that talk over a single read-only JSON route:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/architecture.svg" width="100%" alt="dsh-download-dock data flow: download tools → Host sampling → JSON state → browser card">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/architecture.svg" width="100%" alt="dsh-transfer-dock data flow: download tools → Host sampling → JSON state → browser card">
 </p>
 
 | Half | Files | Runtime | Responsibility |
@@ -132,7 +132,7 @@ flowchart LR
 4. If the command contains exactly one HTTP(S) URL, the Host sends a `HEAD` request and reads `content-length` as the total.
 5. Every 700 ms the Host samples only the **delta**, so pre-existing files never count as part of this download.
 6. After the job ends, the Host keeps returning it for 12 seconds (`settledTtlMs`) so the browser can render the final state.
-7. The browser fetches `/plugin/dsh-download-dock/state` every 600 ms and pauses while the page is hidden.
+7. The browser fetches `/plugin/dsh-transfer-dock/state` every 600 ms and pauses while the page is hidden.
 8. The browser merges disk bytes with the downloader's own progress lines, renders the card, and fades finished cards out after 2.6 seconds.
 
 ## Three data sources
@@ -279,19 +279,19 @@ The plugin is listed in the [awesome-dsh-plugin](https://github.com/awesome-dsh-
 ### From the CLI
 
 ```powershell
-dsh plugin --profile desktop add github:imnotRiv3r/dsh-download-dock
+dsh plugin --profile desktop add github:imnotRiv3r/dsh-transfer-dock
 ```
 
-That one command is the whole install: it adds the dependency to the profile's `package.json` and appends `dsh-download-dock` to `dsh.profile.bundles`. There is no npm package — the GitHub source is the only release channel. To pin a commit:
+That one command is the whole install: it adds the dependency to the profile's `package.json` and appends `dsh-transfer-dock` to `dsh.profile.bundles`. There is no npm package — the GitHub source is the only release channel. To pin a commit:
 
 ```powershell
-dsh plugin --profile desktop add github:imnotRiv3r/dsh-download-dock#b2404e2
+dsh plugin --profile desktop add github:imnotRiv3r/dsh-transfer-dock#b2404e2
 ```
 
 Uninstall is symmetric — it drops the dependency and the `bundles` row together:
 
 ```powershell
-dsh plugin --profile desktop remove dsh-download-dock
+dsh plugin --profile desktop remove dsh-transfer-dock
 ```
 
 The repo has no build step (no `prepare`/`install` script, and `exports` points straight at the source), so the first install does not raise pnpm's `allowBuilds` prompt.
@@ -299,12 +299,12 @@ The repo has no build step (no `prepare`/`install` script, and `exports` points 
 ### Link a local checkout (development)
 
 ```powershell
-dsh plugin --profile desktop add 'link:E:\dshWorkspace\dsh-download-dock'
+dsh plugin --profile desktop add 'link:E:\dshWorkspace\dsh-transfer-dock'
 ```
 
 The profile now points at your checkout, so edits are live: the Host half hot-reloads with the profile, the browser half needs one page refresh. pnpm warns that a `link:` dependency does not resolve `peerDependencies` from the target — the only one this package declares is `@deepseek-ai/schemastery`, which a DSH profile already provides through `@deepseek-ai/dsh-base`.
 
-Prefer a frozen copy, where edits require re-running the command? Use `file:E:\dshWorkspace\dsh-download-dock` instead of `link:...`.
+Prefer a frozen copy, where edits require re-running the command? Use `file:E:\dshWorkspace\dsh-transfer-dock` instead of `link:...`.
 
 ### What reloads when
 
@@ -322,13 +322,13 @@ Prefer a frozen copy, where edits require re-running the command? Use `file:E:\d
 
 ```powershell
 # Is the Host half alive? `hits` grows once the browser half attaches (use your DSH Web port).
-Invoke-RestMethod http://127.0.0.1:2482/plugin/dsh-download-dock/state
+Invoke-RestMethod http://127.0.0.1:2482/plugin/dsh-transfer-dock/state
 ```
 
 A healthy response looks like:
 
 ```json
-{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.0" } }
+{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" } }
 ```
 
 Now trigger a visible download (rate-limited to 300 KB/s so the card has time to appear):
@@ -342,11 +342,11 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
 
 ## Config
 
-The row id is `download-dock`; edit it in the profile's `cordis.patch.yml`:
+The row id is `transfer-dock`; edit it in the profile's `cordis.patch.yml`:
 
 ```yaml
-- id: download-dock
-  name: dsh-download-dock
+- id: transfer-dock
+  name: dsh-transfer-dock
   config:
     enabled: true
     guidePrompt: true
@@ -373,7 +373,7 @@ With `guidePrompt` on, the plugin injects a short system-prompt section: **for d
 
 ## The state route
 
-`GET /plugin/dsh-download-dock/state` returns a read-only JSON snapshot (`cache-control: no-store`):
+`GET /plugin/dsh-transfer-dock/state` returns a read-only JSON snapshot (`cache-control: no-store`):
 
 ```json
 {
@@ -397,7 +397,7 @@ With `guidePrompt` on, the plugin injects a short system-prompt section: **for d
       "source": "temp"
     }
   ],
-  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.0" }
+  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" }
 }
 ```
 
@@ -428,7 +428,7 @@ For debugging, add `?diag=...` to the URL: the value is truncated to 4000 charac
 |---|---|---|
 | No card at all | Not a background job | Use `run_in_background: true`; foreground downloads never show a card |
 | | Command doesn't look like a download | Check it against the list above; `npm run build` and `git status` don't count |
-| | Browser half not loaded | Refresh the page; confirm `dsh-download-dock` is in `bundles` |
+| | Browser half not loaded | Refresh the page; confirm `dsh-transfer-dock` is in `bundles` |
 | | Plugin disabled | Check `enabled`; look for `disabled by config` in the Host log |
 | | `webServer` not ready | The plugin retries every 500 ms, 20 times; after that you'll see `webServer never became available` |
 | Card appears but bytes stay at 0 | Download doesn't hit disk, or lands somewhere unresolved | Use an explicit `-o` / `-OutFile`; make sure `$var` paths expand to real absolute paths |
@@ -465,8 +465,8 @@ Three-state diagnosis with `poll.hits`:
 ## Development
 
 ```powershell
-git clone https://github.com/imnotRiv3r/dsh-download-dock.git
-cd dsh-download-dock
+git clone https://github.com/imnotRiv3r/dsh-transfer-dock.git
+cd dsh-transfer-dock
 
 node test/smoke.mjs   # detection, parsing, merging, browser-half registration — fully offline
 npm run check         # node --check on every source file

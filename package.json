@@ -1,6 +1,6 @@
 {
-  "name": "dsh-download-dock",
-  "version": "0.1.0",
+  "name": "dsh-transfer-dock",
+  "version": "0.1.1",
   "type": "module",
   "description": "下载坞：在 DeepSeek Harness 界面右下角显示后台下载的实时进度卡片（字节、速度、剩余时间），覆盖 git clone / pip / npm / curl / aria2 / winget 等后台下载。",
   "icon": "icon.svg",
@@ -8,11 +8,11 @@
   "author": "imnotRiv3r",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imnotRiv3r/dsh-download-dock.git"
+    "url": "git+https://github.com/imnotRiv3r/dsh-transfer-dock.git"
   },
-  "homepage": "https://github.com/imnotRiv3r/dsh-download-dock#readme",
+  "homepage": "https://github.com/imnotRiv3r/dsh-transfer-dock#readme",
   "bugs": {
-    "url": "https://github.com/imnotRiv3r/dsh-download-dock/issues"
+    "url": "https://github.com/imnotRiv3r/dsh-transfer-dock/issues"
   },
   "keywords": [
     "deepseek-harness",

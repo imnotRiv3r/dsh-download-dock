@@ -1,7 +1,7 @@
 <p align="right"><a href="README.md">English</a> · <b>中文</b></p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/banner.svg" width="100%" alt="dsh-download-dock — 在 DeepSeek Harness 右下角显示实时下载卡片">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/banner.svg" width="100%" alt="dsh-transfer-dock — 在 DeepSeek Harness 右下角显示实时下载卡片">
 </p>
 
 <p align="center">
@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A520-3c873a?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js >= 20">
   <img src="https://img.shields.io/badge/dsh-0.2.0--rc.1%2B-7c5cff?style=flat-square" alt="DeepSeek Harness >= 0.2.0-rc.1">
   <img src="https://img.shields.io/badge/tests-smoke%20%C2%B7%20offline-22d3ee?style=flat-square" alt="Tests: offline smoke">
-  <img src="https://img.shields.io/badge/version-0.1.0-6d4aff?style=flat-square" alt="Version 0.1.0">
+  <img src="https://img.shields.io/badge/version-0.1.1-6d4aff?style=flat-square" alt="Version 0.1.1">
 </p>
 
 <p align="center">
@@ -20,8 +20,8 @@
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/card-fill.png" width="46%" alt="知道总量时的下载卡片：32% · curl">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/card-stripes.png" width="46%" alt="不确定态卡片：条纹流动，显示已写入字节">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/card-fill.png" width="46%" alt="知道总量时的下载卡片：32% · curl">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/card-stripes.png" width="46%" alt="不确定态卡片：条纹流动，显示已写入字节">
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 > 你在 Harness 里起了一个 2 GB 的模型下载，命令进了后台。界面右下角什么都没有，任务行只写着「Running」。
 > 你不知道它是在全速下载、被 DNS 卡住、还是早就停了。
 >
-> dsh-download-dock 把那几十秒变成一张卡片：**文件名、32%、4.14 MB / 12.9 MB、148 KB/s、剩 59s**。
+> dsh-transfer-dock 把那几十秒变成一张卡片：**文件名、32%、4.14 MB / 12.9 MB、148 KB/s、剩 59s**。
 > 不另开窗口、不改下载命令、不接管任务——它只是观察，然后把观察结果画在你正在看的地方。
 
 ## 目录
@@ -59,7 +59,7 @@
 
 Harness 的下载类命令经常被放进后台任务（`run_in_background: true`），这样它不会锁住当前回合；代价是界面只剩一行任务状态。十几秒后才有一行结束通知，中间发生了什么完全不可见。
 
-dsh-download-dock 补上的正是这段盲区，并且**只做观察**：
+dsh-transfer-dock 补上的正是这段盲区，并且**只做观察**：
 
 | 它做 | 它不做 |
 |---|---|
@@ -77,7 +77,7 @@ dsh-download-dock 补上的正是这段盲区，并且**只做观察**：
 | 元素 | 内容 | 说明 |
 |---|---|---|
 | 工具徽标 | `git` / `py` / `npm` / `a2` / `c` / `w` / `web` / `app` / `rs` / `go` / `dk` | 由识别到的工具决定，渐变底色 + 小号字母 |
-| 标题 | 文件名、仓库名或包名 | `numpy-2.2.6-cp310-win_amd64.whl`、`dsh-download-dock`、`lodash`；取不到时退化为命令首行前 60 字符 |
+| 标题 | 文件名、仓库名或包名 | `numpy-2.2.6-cp310-win_amd64.whl`、`dsh-transfer-dock`、`lodash`；取不到时退化为命令首行前 60 字符 |
 | 副标题 | 字节进度或状态文本 | `4.14 MB / 12.9 MB`、`已写入 12.4 MB`、`已完成`、`下载失败`、`已取消`、`正在停止…` |
 | 进度条 | 填充条或流动条纹 | 有总量 → 填充百分比；无总量 → 条纹（见[条纹不是坏掉](#条纹不是坏掉)） |
 | 左下 | 百分比 + 工具名 | 只有工具名时说明处于不确定态 |
@@ -101,7 +101,7 @@ dsh-download-dock 补上的正是这段盲区，并且**只做观察**：
 插件分成两个半区，它们之间只通过一条只读 JSON 路由通信：
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-download-dock/main/docs/architecture.svg" width="100%" alt="dsh-download-dock 数据流：下载工具 → Host 采样 → JSON 状态 → 浏览器卡片">
+  <img src="https://raw.githubusercontent.com/imnotRiv3r/dsh-transfer-dock/main/docs/architecture.svg" width="100%" alt="dsh-transfer-dock 数据流：下载工具 → Host 采样 → JSON 状态 → 浏览器卡片">
 </p>
 
 | 半区 | 文件 | 运行环境 | 职责 |
@@ -132,7 +132,7 @@ flowchart LR
 4. 若命令里只有一个 HTTP(S) URL，Host 发一次 `HEAD` 读 `content-length`，补上总量。
 5. 每 700 ms 采样一次；只算增量，所以目录里的旧文件不会被算进来。
 6. 任务结束后，Host 继续返回该任务 12 秒（`settledTtlMs`），让浏览器有时间渲染收尾状态。
-7. 浏览器每 600 ms 拉一次 `/plugin/dsh-download-dock/state`；页面隐藏时暂停轮询。
+7. 浏览器每 600 ms 拉一次 `/plugin/dsh-transfer-dock/state`；页面隐藏时暂停轮询。
 8. 浏览器把「磁盘字节」和「job 输出里下载器自己报的进度」合并，渲染卡片；结束的卡片在 2.6 秒后淡出。
 
 ## 三条数据通路
@@ -279,19 +279,19 @@ flowchart LR
 ### 从命令行安装
 
 ```powershell
-dsh plugin --profile desktop add github:imnotRiv3r/dsh-download-dock
+dsh plugin --profile desktop add github:imnotRiv3r/dsh-transfer-dock
 ```
 
-这一条命令就是完整安装：把依赖写进 profile 的 `package.json`，并把 `dsh-download-dock` 追加到 `dsh.profile.bundles`。本插件没有 npm 包，GitHub 源是唯一发布渠道。需要固定 commit 时：
+这一条命令就是完整安装：把依赖写进 profile 的 `package.json`，并把 `dsh-transfer-dock` 追加到 `dsh.profile.bundles`。本插件没有 npm 包，GitHub 源是唯一发布渠道。需要固定 commit 时：
 
 ```powershell
-dsh plugin --profile desktop add github:imnotRiv3r/dsh-download-dock#b2404e2
+dsh plugin --profile desktop add github:imnotRiv3r/dsh-transfer-dock#b2404e2
 ```
 
 卸载是对称的——依赖与 `bundles` 行会一起移除：
 
 ```powershell
-dsh plugin --profile desktop remove dsh-download-dock
+dsh plugin --profile desktop remove dsh-transfer-dock
 ```
 
 仓库没有构建步骤（没有 `prepare`/`install` 脚本，`exports` 直接指向源码），所以首次安装不会触发 pnpm 的 `allowBuilds` 审批。
@@ -299,12 +299,12 @@ dsh plugin --profile desktop remove dsh-download-dock
 ### 链接本地目录（开发）
 
 ```powershell
-dsh plugin --profile desktop add 'link:E:\dshWorkspace\dsh-download-dock'
+dsh plugin --profile desktop add 'link:E:\dshWorkspace\dsh-transfer-dock'
 ```
 
 之后 profile 指向你的工作副本，改动即时生效：Host 半随 profile 热加载，浏览器半需要刷新一次页面。pnpm 会警告 `link:` 依赖不会从目标解析 `peerDependencies`——本包只声明了 `@deepseek-ai/schemastery`，而 DSH profile 已通过 `@deepseek-ai/dsh-base` 提供它。
 
-如果你想要一份冻结的副本（改动后需重跑命令），把 `link:...` 换成 `file:E:\dshWorkspace\dsh-download-dock`。
+如果你想要一份冻结的副本（改动后需重跑命令），把 `link:...` 换成 `file:E:\dshWorkspace\dsh-transfer-dock`。
 
 ### 生效顺序
 
@@ -322,13 +322,13 @@ dsh plugin --profile desktop add 'link:E:\dshWorkspace\dsh-download-dock'
 
 ```powershell
 # Host 半是否活着（浏览器半挂上后 hits 会持续增长；端口以你的 DSH Web 实例为准）
-Invoke-RestMethod http://127.0.0.1:2482/plugin/dsh-download-dock/state
+Invoke-RestMethod http://127.0.0.1:2482/plugin/dsh-transfer-dock/state
 ```
 
 正常输出长这样：
 
 ```json
-{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.0" } }
+{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" } }
 ```
 
 再触发一次可见的下载（限速 300 KB/s，让卡片有足够时间出现）：
@@ -342,11 +342,11 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
 
 ## 配置
 
-行 id 是 `download-dock`，在 profile 的 `cordis.patch.yml` 里改：
+行 id 是 `transfer-dock`，在 profile 的 `cordis.patch.yml` 里改：
 
 ```yaml
-- id: download-dock
-  name: dsh-download-dock
+- id: transfer-dock
+  name: dsh-transfer-dock
   config:
     enabled: true
     guidePrompt: true
@@ -373,7 +373,7 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
 
 ## 状态接口
 
-`GET /plugin/dsh-download-dock/state` 返回一份只读 JSON 快照（`cache-control: no-store`）：
+`GET /plugin/dsh-transfer-dock/state` 返回一份只读 JSON 快照（`cache-control: no-store`）：
 
 ```json
 {
@@ -397,7 +397,7 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
       "source": "temp"
     }
   ],
-  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.0" }
+  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" }
 }
 ```
 
@@ -428,7 +428,7 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
 |---|---|---|
 | 一张卡片都没有 | 命令不是后台任务 | 用 `run_in_background: true`；前台下载永远不会出卡片 |
 | | 命令不像下载 | 检查命令是否在识别清单内；`npm run build`、`git status` 不算下载 |
-| | 浏览器半没加载 | 刷新页面；确认 `bundles` 里有 `dsh-download-dock` |
+| | 浏览器半没加载 | 刷新页面；确认 `bundles` 里有 `dsh-transfer-dock` |
 | | 插件被关闭 | 检查 `enabled`；看 Host 日志是否出现 `disabled by config` |
 | | `webServer` 未就绪 | 插件会以 500 ms 间隔重试 20 次；超时后日志里会有 `webServer never became available` |
 | 卡片有，但字节一直是 0 | 下载不落盘或落到未解析路径 | 命令里显式用 `-o` / `-OutFile`；带 `$var` 的路径要确保能展开成真实绝对路径 |
@@ -465,8 +465,8 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
 ## 开发
 
 ```powershell
-git clone https://github.com/imnotRiv3r/dsh-download-dock.git
-cd dsh-download-dock
+git clone https://github.com/imnotRiv3r/dsh-transfer-dock.git
+cd dsh-transfer-dock
 
 node test/smoke.mjs   # 识别、解析、合并、浏览器半注册；完全离线
 npm run check         # 对每个源文件跑 node --check
