@@ -68,7 +68,7 @@ const start = pluginSource.indexOf('const MATCHERS = [')
 const end = pluginSource.indexOf('/** 面板本体。 */')
 assert.ok(start > 0 && end > start, '无法从 client.js 切出纯函数段')
 const pure = new Function(
-  `const MAX_TEXT = ${16 * 1024}\n${pluginSource.slice(start, end)}\nreturn { parseProgress, present, formatBytes, formatDuration, parseEta }`,
+  `const MAX_TEXT = ${16 * 1024}\nconst GRAPHEMES = new Intl.Segmenter()\n${pluginSource.slice(start, end)}\nreturn { parseProgress, present, formatBytes, formatDuration, parseEta, fileGlyph, progressDisplay }`,
 )()
 
 // 真实 git clone 输出的尾部（节选）：Resolving 阶段不能把百分比拉回 100
@@ -110,6 +110,38 @@ assert.equal(pure.parseProgress('#################   45.0%').percent, 45)
 assert.equal(pure.formatBytes(1_234_567), '1.23 MB')
 assert.equal(pure.formatDuration(83_000), '1m 23s')
 
+// 卡片与悬浮球共用首字符和进度，emoji/组合字母不能被切断。
+for (const [name, glyph] of [['report.pdf', 'r'], ['资料.zip', '资'], ['👩🏽‍💻.zip', '👩🏽‍💻'], [' e\u0301.txt', 'e\u0301'], ['', '↓'], [null, '↓']]) {
+  assert.equal(pure.fileGlyph(name), glyph)
+}
+// 悬浮球与卡片共用这一份读数：真实百分比、未知态、终态必须能区分开。
+const running0 = pure.progressDisplay({ status: 'running' }, { running: true, percent: 0 })
+assert.equal(running0.percent, 0)
+assert.equal(running0.spinning, false, '已知总大小的 0% 不是「未知」，不能转圈')
+assert.ok(running0.drawn >= 1.5, '运行时 0% 也要能看见一段弧')
+const unknown = pure.progressDisplay({ status: 'running' }, { running: true })
+assert.equal(unknown.spinning, true)
+assert.equal(unknown.drawn, undefined)
+const completed = pure.progressDisplay({ status: 'completed' }, { running: false, percent: 95 })
+assert.equal(completed.percent, 100, '完成一律是满环')
+assert.equal(completed.drawn, 100)
+const failedKnown = pure.progressDisplay({ status: 'failed' }, { running: false, percent: 38 })
+assert.equal(failedKnown.percent, 38)
+assert.equal(failedKnown.failedUnknown, false)
+const failedUnknown = pure.progressDisplay({ status: 'killed' }, { running: false })
+assert.equal(failedUnknown.spinning, false)
+assert.equal(failedUnknown.percent, undefined)
+assert.equal(failedUnknown.failedUnknown, true, '失败且无百分比不能画满环冒充 100%')
+// 有总量但还没写入字节：应该是 0%，不是「未知」。
+assert.equal(
+  pure.present(
+    { id: 'j', tool: 'curl', fileName: 'a.bin', status: 'running', startedAt: Date.now(), finishedAt: null, bytes: 0, total: 1_000_000 },
+    '',
+    Date.now(),
+  ).percent,
+  0,
+)
+
 // ---------- 3. 浏览器半的注册 ----------
 const registrations = []
 globalThis.window = { __ModuleLoader__: { load: registration => registrations.push(registration) } }
@@ -132,10 +164,18 @@ const exported = registrations[0].factory(specifier => {
   if (specifier === 'react') return react
   throw new Error(`意外的 require: ${specifier}`)
 })
-assert.deepEqual(exported.inject, ['slots', 'jobs'])
+assert.deepEqual(exported.inject, ['slots', 'jobs', 'locale'])
 
 let registered
 exported.apply({
+  effect: callback => callback(),
+  locale: {
+    register: (namespace, messages) => {
+      assert.equal(namespace, 'dsh-transfer-dock.ui')
+      assert.deepEqual(Object.keys(messages.en), Object.keys(messages.zh))
+      return () => {}
+    },
+  },
   slots: {
     inject: (name, run) => {
       assert.equal(name, 'shell.overlay')
