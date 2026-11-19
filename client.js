@@ -31,22 +31,86 @@ window.__ModuleLoader__.load({
     })()
 
     const EMPTY = { version: 1, now: 0, tasks: [] }
+    const GRAPHEMES = new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+    const MESSAGES = {
+      en: {
+        collapse: 'Collapse download to a floating button',
+        expand: 'Expand download',
+        unknown: 'Progress unknown',
+        downloading: 'Downloading…',
+        fetching: 'Fetching repository…',
+        stopping: 'Stopping…',
+        completed: 'Completed',
+        failed: 'Download failed',
+        killed: 'Cancelled',
+        written: 'Written:',
+        remaining: 'Left:',
+      },
+      zh: {
+        collapse: '收起为悬浮球',
+        expand: '展开下载详情',
+        unknown: '进度未知',
+        downloading: '正在下载…',
+        fetching: '正在获取仓库…',
+        stopping: '正在停止…',
+        completed: '已完成',
+        failed: '下载失败',
+        killed: '已取消',
+        written: '已写入',
+        remaining: '剩',
+      },
+    }
 
-    /** 状态色与排版都走主题变量；缺省值只是兜底。 */
+    /** 状态色与排版都走主题变量。 */
     const S = {
       wrap: {
         position: 'fixed',
-        right: 18,
-        bottom: 18,
+        right: 12,
+        bottom: 12,
         zIndex: 2147483000,
         display: 'flex',
-        flexDirection: 'column',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-end',
         gap: 8,
-        width: 366,
-        maxWidth: 'calc(100vw - 36px)',
+        width: 378,
+        maxWidth: 'calc(100vw - 24px)',
+        maxHeight: 'calc(100dvh - 24px)',
+        padding: 6,
+        boxSizing: 'border-box',
+        overflowY: 'auto',
+        pointerEvents: 'none',
+      },
+      ball: {
+        pointerEvents: 'auto',
+        position: 'relative',
+        flex: '0 0 auto',
+        width: 48,
+        height: 48,
+        display: 'grid',
+        placeItems: 'center',
+        padding: 0,
+        border: '1px solid var(--dsw-alias-border-l2)',
+        borderRadius: '50%',
+        background: 'var(--dsw-alias-button-floating-fill)',
+        boxShadow: '0 3px 12px color-mix(in srgb, var(--dsw-alias-label-primary) 15%, transparent)',
+        color: 'var(--dsw-alias-label-primary)',
+        font: 'inherit',
+        fontSize: 17,
+        lineHeight: 1,
+        fontWeight: 650,
+        cursor: 'pointer',
+      },
+      ring: {
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
         pointerEvents: 'none',
       },
       card: {
+        flex: '0 0 100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
         pointerEvents: 'auto',
         borderRadius: 14,
         border: '1px solid var(--dsw-alias-border-l2)',
@@ -54,7 +118,6 @@ window.__ModuleLoader__.load({
         boxShadow: '0 18px 40px -18px rgba(0, 0, 0, .55), 0 2px 8px -2px rgba(0, 0, 0, .25)',
         backdropFilter: 'blur(12px) saturate(140%)',
         padding: '11px 12px 12px',
-        animation: 'dsh-transfer-dock-in 180ms ease-out both',
         fontFamily: 'inherit',
       },
       head: { display: 'flex', alignItems: 'center', gap: 9, marginBottom: 9 },
@@ -68,11 +131,8 @@ window.__ModuleLoader__.load({
         justifyContent: 'center',
         fontSize: 11,
         fontWeight: 700,
-        letterSpacing: '-0.02em',
-        color: 'var(--dsw-alias-label-primary-inverted, #fff)',
-        background: 'linear-gradient(150deg, var(--dsw-alias-brand-primary), #7c5cff)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,.28)',
-        textTransform: 'uppercase',
+        color: 'var(--dsw-alias-brand-text)',
+        background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 14%, var(--dsw-alias-bg-layer-1))',
       },
       titles: { display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 },
       name: {
@@ -115,8 +175,7 @@ window.__ModuleLoader__.load({
       fill: {
         height: '100%',
         borderRadius: 999,
-        background:
-          'linear-gradient(90deg, var(--dsw-alias-brand-primary), color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, #8b5cf6))',
+        background: 'var(--dsw-alias-brand-primary)',
         transition: 'width 240ms ease-out',
       },
       fillDone: { background: 'var(--dsw-alias-state-success-primary)' },
@@ -149,8 +208,15 @@ window.__ModuleLoader__.load({
         wordBreak: 'break-word',
       },
       keyframes: [
-        '@keyframes dsh-transfer-dock-in{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}',
+        '@keyframes dsh-transfer-dock-in{from{opacity:0;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}',
         '@keyframes dsh-transfer-dock-stripes{from{background-position:0 0}to{background-position:24px 0}}',
+        '@keyframes dsh-transfer-dock-spin{to{transform:rotate(360deg)}}',
+        '.dsh-transfer-dock-card,.dsh-transfer-dock-ball{animation:dsh-transfer-dock-in 150ms ease-out both}',
+        '.dsh-transfer-dock-spin{animation:dsh-transfer-dock-spin 1.3s linear infinite}',
+        '.dsh-transfer-dock-arc{transition:stroke-dashoffset 240ms ease-out}',
+        '.dsh-transfer-dock-ball:hover{background:var(--dsw-alias-button-floating-hover)!important}',
+        '.dsh-transfer-dock button:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}',
+        '@media (prefers-reduced-motion: reduce){.dsh-transfer-dock-card,.dsh-transfer-dock-ball,.dsh-transfer-dock-spin,.dsh-transfer-dock-stripes{animation:none!important}.dsh-transfer-dock-arc{transition:none}}',
       ].join(''),
     }
 
@@ -365,7 +431,7 @@ window.__ModuleLoader__.load({
             ? task.total
             : undefined
       let percent = Number.isFinite(parsed.percent) ? parsed.percent : undefined
-      if (percent === undefined && total !== undefined && downloaded > 0) {
+      if (percent === undefined && total !== undefined) {
         percent = Math.min(100, (downloaded / total) * 100)
       }
       const speed = Number.isFinite(parsed.speed) && parsed.speed > 0 ? parsed.speed : task.speed
@@ -395,14 +461,32 @@ window.__ModuleLoader__.load({
      * @param view - 展示模型。
      * @returns 短文本。
      */
-    function subtitleOf(task, view) {
-      if (task.status === 'failed') return '下载失败'
-      if (task.status === 'killed') return '已取消'
-      if (task.status === 'completed') return '已完成'
-      if (task.status === 'stopping') return '正在停止…'
+    function subtitleOf(task, view, t) {
+      if (['failed', 'killed', 'completed', 'stopping'].includes(task.status)) return t(task.status)
       if (view.total !== undefined) return `${formatBytes(view.downloaded)} / ${formatBytes(view.total)}`
-      if (view.downloaded > 0) return `已写入 ${formatBytes(view.downloaded)}`
-      return task.tool === 'git' ? '正在获取仓库…' : '正在下载…'
+      if (view.downloaded > 0) return `${t('written')} ${formatBytes(view.downloaded)}`
+      return t(task.tool === 'git' ? 'fetching' : 'downloading')
+    }
+
+    function fileGlyph(fileName) {
+      const name = typeof fileName === 'string' ? fileName.trim() : ''
+      return GRAPHEMES.segment(name)[Symbol.iterator]().next().value?.segment ?? '↓'
+    }
+
+    function progressDisplay(task, view) {
+      const failed = task.status === 'failed' || task.status === 'killed'
+      const done = task.status === 'completed'
+      const percent = done ? 100 : Number.isFinite(view.percent) ? Math.max(0, Math.min(100, view.percent)) : undefined
+      return {
+        done,
+        failed,
+        percent,
+        // 刚起步时 0% 的环看不见；运行时给一段最小弧，读数仍是真实百分比。
+        drawn: percent === undefined ? undefined : view.running ? Math.max(1.5, percent) : percent,
+        spinning: view.running && percent === undefined,
+        // 失败/取消且从没拿到百分比：这是「出错了」，不是「下载完了」。
+        failedUnknown: failed && percent === undefined,
+      }
     }
 
     /**
@@ -411,11 +495,11 @@ window.__ModuleLoader__.load({
      * @param view - 展示模型。
      * @returns 短文本。
      */
-    function metaOf(task, view) {
+    function metaOf(view, t) {
       if (!view.running) return formatDuration(view.elapsed)
       const parts = []
       if (view.speed > 0) parts.push(`${formatBytes(view.speed)}/s`)
-      if (view.eta !== undefined && Number.isFinite(view.eta)) parts.push(`剩 ${formatDuration(view.eta)}`)
+      if (view.eta !== undefined && Number.isFinite(view.eta)) parts.push(`${t('remaining')} ${formatDuration(view.eta)}`)
       parts.push(formatDuration(view.elapsed))
       return parts.join(' · ')
     }
@@ -425,7 +509,11 @@ window.__ModuleLoader__.load({
       const jobs = props.jobs
       const [snapshot, setSnapshot] = React.useState(EMPTY)
       const [clock, setClock] = React.useState(() => Date.now())
-      const [dismissed, setDismissed] = React.useState(() => new Set())
+      const { locale } = props
+      const t = React.useMemo(() => locale.bind('dsh-transfer-dock.ui'), [locale])
+      const subscribeLocale = React.useCallback(callback => locale.subscribe(callback), [locale])
+      const getLocale = React.useCallback(() => locale.getSnapshot(), [locale])
+      React.useSyncExternalStore(subscribeLocale, getLocale)
 
       // 轮询 Host 状态；页面隐藏时暂停，避免无意义开销。
       React.useEffect(() => {
@@ -458,26 +546,14 @@ window.__ModuleLoader__.load({
         }
       }, [])
 
-      // 注入一次动画关键帧。
-      React.useEffect(() => {
-        const id = 'dsh-transfer-dock-style'
-        if (document.getElementById(id) !== null) return
-        const style = document.createElement('style')
-        style.id = id
-        style.textContent = S.keyframes
-        document.head.appendChild(style)
-      }, [])
-
       // 让耗时与 ETA 持续走动。
       React.useEffect(() => {
         const timer = setInterval(() => setClock(Date.now()), 500)
         return () => clearInterval(timer)
       }, [])
 
-      const tasks = React.useMemo(
-        () => snapshot.tasks.filter(task => !dismissed.has(String(task.id))),
-        [snapshot, dismissed],
-      )
+      // 收起只改变显示，不把任务从进度订阅中剔除。
+      const tasks = snapshot.tasks
 
       // 对运行中的任务打开输出观测，失败或结束即释放。
       const watchKey = tasks
@@ -527,60 +603,166 @@ window.__ModuleLoader__.load({
         const finished = !view.running
         // 太短的任务不闪一下；结束的任务留一小段淡出时间。
         if (!finished && view.elapsed < MIN_LIVE_MS) continue
-        if (finished && task.finishedAt !== null && task.finishedAt !== undefined) {
-          if (clock - task.finishedAt > FADE_MS) continue
-        }
-        cards.push(h(Card, { key: String(task.id), task, view, onDismiss: () => dismiss(task.id, setDismissed) }))
+        const settledAt = task.finishedAt
+        const expired =
+          finished && settledAt !== null && settledAt !== undefined && clock - settledAt > FADE_MS
+        // 过期由卡片自己处理：聚焦中的卡片留到失焦，别把键盘焦点丢给 body。
+        cards.push(h(DownloadTile, { key: String(task.id), task, view, t, expired }))
       }
       if (cards.length === 0) return null
       // 挂到 body：插槽容器上的 transform / overflow 会让 position: fixed 失效或被裁剪。
-      const panel = h('div', { style: S.wrap, className: 'dsh-transfer-dock' }, cards)
+      const panel = h('div', { style: S.wrap, className: 'dsh-transfer-dock' }, h('style', null, S.keyframes), cards)
       if (ReactDOM !== null) return ReactDOM.createPortal(panel, document.body)
       return panel
     }
 
-    /**
-     * 单张卡片。
-     * @param props - 任务、展示模型与关闭回调。
-     * @returns 卡片节点。
-     */
-    function Card({ task, view, onDismiss }) {
-      const done = task.status === 'completed'
-      const failed = task.status === 'failed' || task.status === 'killed'
-      const percent = view.percent
+    /** 键盘焦点（:focus-visible）是否还停在这一项里。 */
+    function holdsKeyboardFocus(node) {
+      if (node === null || typeof document === 'undefined') return false
+      const active = document.activeElement
+      if (active === null || active === undefined || !node.contains(active)) return false
+      try {
+        return typeof active.matches === 'function' ? active.matches(':focus-visible') : true
+      } catch {
+        return true
+      }
+    }
+
+    /** 同一个任务在卡片与球之间切换，保留订阅和键盘焦点。 */
+    function DownloadTile({ task, view, t, expired }) {
+      const [collapsed, setCollapsed] = React.useState(false)
+      const [, setFocusTick] = React.useState(0)
+      const nextFocus = React.useRef(false)
+      const control = React.useRef(null)
+      const root = React.useRef(null)
+      React.useLayoutEffect(() => {
+        if (nextFocus.current) {
+          nextFocus.current = false
+          control.current?.focus({ preventScroll: true })
+        }
+      }, [collapsed])
+      const toggle = () => {
+        nextFocus.current = true
+        setCollapsed(value => !value)
+      }
+      const focusProps = {
+        onFocus: () => setFocusTick(value => value + 1),
+        onBlur: event => {
+          // 卡片与球互换时控件会被替换，那一次失焦不算「人走开了」。
+          const next = event.relatedTarget
+          if (next !== null && typeof next === 'object' && event.currentTarget.contains(next)) return
+          setFocusTick(value => value + 1)
+        },
+      }
+      const progress = progressDisplay(task, view)
+      const glyph = fileGlyph(task.fileName)
+      const shared = { rootRef: root, task, view, t, progress, glyph, control, toggle, focusProps }
+      // 结束的卡片到时间就该消失；但键盘用户还停在这一项上时，留到失焦为止。
+      if (expired && !holdsKeyboardFocus(root.current)) return null
+      return collapsed ? h(ProgressBall, shared) : h(Card, shared)
+    }
+
+    function ProgressBall({ task, view, t, progress, glyph, control, toggle, focusProps, rootRef }) {
+      const { done, failed, percent, drawn, spinning, failedUnknown } = progress
+      const fileName = task.fileName || task.tool
+      const status = !view.running || task.status === 'stopping' ? subtitleOf(task, view, t) : ''
+      const amount = percent !== undefined ? `${Math.round(percent)}%` : spinning ? t('unknown') : ''
+      const info = [status, amount].filter(Boolean).join(' · ')
+      const label = `${t('expand')}: ${fileName}${info ? ` (${info})` : ''}`
+      const stroke = done
+        ? 'var(--dsw-alias-state-success-primary)'
+        : failed
+          ? 'var(--dsw-alias-state-error-primary)'
+          : 'var(--dsw-alias-brand-primary)'
+      const circle = { cx: 24, cy: 24, r: 19.5, fill: 'none', strokeWidth: 3, pathLength: 100 }
+      const centered = { transform: 'rotate(-90 24 24)' }
+      let arc = null
+      if (spinning) {
+        // 不知道百分比：转圈，不假装有进度。
+        arc = h(
+          'g',
+          { className: 'dsh-transfer-dock-spin', style: { transformOrigin: '24px 24px' } },
+          h('circle', { ...circle, ...centered, stroke, strokeLinecap: 'round', strokeDasharray: '24 76' }),
+        )
+      } else if (failedUnknown) {
+        // 失败且从未拿到百分比：虚线环说明「有问题」，不用满环冒充 100%。
+        arc = h('circle', { ...circle, ...centered, stroke, strokeDasharray: '5 7' })
+      } else if (drawn !== undefined) {
+        arc = h('circle', {
+          ...circle,
+          ...centered,
+          stroke,
+          strokeLinecap: 'round',
+          className: 'dsh-transfer-dock-arc',
+          strokeDasharray: '100 100',
+          strokeDashoffset: 100 - drawn,
+        })
+      }
+      return h('button', {
+        ...focusProps,
+        type: 'button',
+        // 收起时这一项本身就是按钮：根节点与焦点控件是同一个元素。
+        ref: node => {
+          rootRef.current = node
+          control.current = node
+        },
+        onClick: toggle, style: S.ball, className: 'dsh-transfer-dock-ball',
+        title: label, 'aria-label': label, 'aria-expanded': false,
+      },
+      h('svg', { viewBox: '0 0 48 48', style: S.ring, 'aria-hidden': true, focusable: 'false' },
+        h('circle', {
+          ...circle,
+          stroke: failedUnknown
+            ? 'color-mix(in srgb, var(--dsw-alias-state-error-primary) 45%, transparent)'
+            : 'var(--dsw-alias-border-l2)',
+        }),
+        arc,
+      ),
+      h('span', { 'aria-hidden': true }, glyph),
+      )
+    }
+
+    function Card({ task, view, t, progress, glyph, control, toggle, focusProps, rootRef }) {
+      const { done, failed, percent, drawn, spinning } = progress
       const fillStyle = { ...S.fill }
       if (done) Object.assign(fillStyle, S.fillDone)
       if (failed) Object.assign(fillStyle, S.fillFailed)
-      if (percent !== undefined) fillStyle.width = `${Math.max(1.5, Math.min(100, percent))}%`
 
-      const bar =
-        percent !== undefined
-          ? h('div', { style: S.track }, h('div', { style: fillStyle }))
-          : h('div', { style: S.track }, h('div', { style: S.indeterminate }))
+      // 失败但没有百分比时不画满条：没有测量值可画，状态由副标题与错误行说明。
+      const bar = h('div', { style: S.track, 'aria-hidden': true },
+        spinning
+          ? h('div', { style: S.indeterminate, className: 'dsh-transfer-dock-stripes' })
+          : drawn === undefined
+            ? null
+            : h('div', { style: { ...fillStyle, width: `${drawn}%` } }),
+      )
 
-      const meta = metaOf(task, view)
+      const meta = metaOf(view, t)
       const percentLabel = percent !== undefined ? `${Math.round(percent)}%` : ''
 
       return h(
         'div',
-        { style: S.card },
+        { ...focusProps, ref: rootRef, style: S.card, className: 'dsh-transfer-dock-card' },
         h(
           'div',
           { style: S.head },
-          h('div', { style: S.badge }, toolGlyph(task.tool)),
+          h('div', { style: S.badge, 'aria-hidden': true }, glyph),
           h(
             'div',
             { style: S.titles },
             h('div', { style: S.name, title: task.label }, task.fileName || task.tool),
-            h('div', { style: S.sub }, subtitleOf(task, view)),
+            h('div', { style: S.sub }, subtitleOf(task, view, t)),
           ),
           h(
             'button',
             {
               type: 'button',
               style: S.close,
-              title: '从列表移除（不影响后台任务）',
-              onClick: onDismiss,
+              ref: control,
+              title: t('collapse'),
+              'aria-label': `${t('collapse')}: ${task.fileName || task.tool}`,
+              'aria-expanded': true,
+              onClick: toggle,
             },
             '✕',
           ),
@@ -612,67 +794,17 @@ window.__ModuleLoader__.load({
       return view !== undefined && typeof view.text === 'string' ? view.text : ''
     }
 
-    /**
-     * 从列表移除一张卡。
-     * @param id - job id。
-     * @param setDismissed - 状态写入器。
-     */
-    function dismiss(id, setDismissed) {
-      setDismissed(current => {
-        const next = new Set(current)
-        next.add(String(id))
-        return next
-      })
-    }
-
-    /**
-     * 工具徽标上的字母。
-     * @param tool - 工具名。
-     * @returns 一到两个字符。
-     */
-    function toolGlyph(tool) {
-      switch (tool) {
-        case 'git':
-          return 'git'
-        case 'pip':
-        case 'uv':
-          return 'py'
-        case 'npm':
-          return 'npm'
-        case 'aria2':
-          return 'a2'
-        case 'curl':
-          return 'c'
-        case 'wget':
-          return 'w'
-        case 'http':
-          return 'web'
-        case 'winget':
-        case 'choco':
-        case 'scoop':
-        case 'nuget':
-          return 'app'
-        case 'cargo':
-          return 'rs'
-        case 'go':
-          return 'go'
-        case 'docker':
-          return 'dk'
-        default:
-          return '↓'
-      }
-    }
-
     return {
-      inject: ['slots', 'jobs'],
+      inject: ['slots', 'jobs', 'locale'],
       apply(ctx) {
+        ctx.effect(() => ctx.locale.register('dsh-transfer-dock.ui', MESSAGES))
         ctx.slots.inject('shell.overlay', () =>
           ctx.slots.register(
             {
               name: 'shell.overlay',
               id: 'dsh-transfer-dock',
               order: 60,
-              inject: () => ({ jobs: ctx.jobs }),
+              inject: () => ({ jobs: ctx.jobs, locale: ctx.locale }),
             },
             DownloadCards,
           ),

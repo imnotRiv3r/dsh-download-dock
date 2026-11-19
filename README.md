@@ -76,7 +76,7 @@ A card is 366 px wide (clamped to `100vw - 36px` on narrow screens), fixed 18 px
 
 | Part | Content | Notes |
 |---|---|---|
-| Tool badge | `git` / `py` / `npm` / `a2` / `c` / `w` / `web` / `app` / `rs` / `go` / `dk` | Derived from the detected tool |
+| File badge | The first character of the file name | The floating button uses the same character |
 | Title | File, repo or package name | e.g. `numpy-2.2.6-cp310-win_amd64.whl`, `dsh-transfer-dock`, `lodash`; falls back to the first 60 characters of the command |
 | Subtitle | Byte progress or status text | `4.14 MB / 12.9 MB`, `12.4 MB written`, `Completed`, `Download failed`, `Cancelled`, `Stopping…` |
 | Bar | Filled bar or moving stripes | Filled when the total is known; stripes otherwise (see [Stripes are not a bug](#stripes-are-not-a-bug)) |
@@ -94,7 +94,7 @@ Status maps directly onto the visuals:
 | `failed` | red | `Download failed` + error line | total elapsed |
 | `killed` | red | `Cancelled` | total elapsed |
 
-The `✕` button only removes the card from the current page — **it never stops the job**. Reloading brings the card back if the job is still running.
+Click `✕` to collapse the card into a floating button without stopping the job. The ring continues showing progress, or a spinning arc when the percentage is unknown. Click the button to expand the card again. Reloading shows any still-running downloads as cards.
 
 ## How it works
 
