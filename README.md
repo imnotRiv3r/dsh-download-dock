@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A520-3c873a?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js >= 20">
   <img src="https://img.shields.io/badge/dsh-0.2.0--rc.1%2B-7c5cff?style=flat-square" alt="DeepSeek Harness >= 0.2.0-rc.1">
   <img src="https://img.shields.io/badge/tests-smoke%20%C2%B7%20offline-22d3ee?style=flat-square" alt="Tests: offline smoke">
-  <img src="https://img.shields.io/badge/version-0.1.1-6d4aff?style=flat-square" alt="Version 0.1.1">
+  <img src="https://img.shields.io/badge/version-0.1.2-6d4aff?style=flat-square" alt="Version 0.1.2">
 </p>
 
 <p align="center">
@@ -328,7 +328,7 @@ Invoke-RestMethod http://127.0.0.1:2482/plugin/dsh-transfer-dock/state
 A healthy response looks like:
 
 ```json
-{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" } }
+{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.2" } }
 ```
 
 Now trigger a visible download (rate-limited to 300 KB/s so the card has time to appear):
@@ -375,6 +375,8 @@ With `guidePrompt` on, the plugin injects a short system-prompt section: **for d
 
 `GET /plugin/dsh-transfer-dock/state` returns a read-only JSON snapshot (`cache-control: no-store`):
 
+The route first calls `ctx.connection.requestRejection(request)`: non-DSH pages (cross-site pages or requests without a same-origin authenticated session) get 401 / 403, so only DSH's own browser page can read the snapshot.
+
 ```json
 {
   "version": 1,
@@ -397,7 +399,7 @@ With `guidePrompt` on, the plugin injects a short system-prompt section: **for d
       "source": "temp"
     }
   ],
-  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" }
+  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.2" }
 }
 ```
 

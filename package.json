@@ -1,6 +1,6 @@
 {
   "name": "dsh-transfer-dock",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "下载坞：在 DeepSeek Harness 界面右下角显示后台下载的实时进度卡片（字节、速度、剩余时间），覆盖 git clone / pip / npm / curl / aria2 / winget 等后台下载。",
   "icon": "icon.svg",

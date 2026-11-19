@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A520-3c873a?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js >= 20">
   <img src="https://img.shields.io/badge/dsh-0.2.0--rc.1%2B-7c5cff?style=flat-square" alt="DeepSeek Harness >= 0.2.0-rc.1">
   <img src="https://img.shields.io/badge/tests-smoke%20%C2%B7%20offline-22d3ee?style=flat-square" alt="Tests: offline smoke">
-  <img src="https://img.shields.io/badge/version-0.1.1-6d4aff?style=flat-square" alt="Version 0.1.1">
+  <img src="https://img.shields.io/badge/version-0.1.2-6d4aff?style=flat-square" alt="Version 0.1.2">
 </p>
 
 <p align="center">
@@ -328,7 +328,7 @@ Invoke-RestMethod http://127.0.0.1:2482/plugin/dsh-transfer-dock/state
 正常输出长这样：
 
 ```json
-{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" } }
+{ "version": 1, "now": 1731427200000, "tasks": [], "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.2" } }
 ```
 
 再触发一次可见的下载（限速 300 KB/s，让卡片有足够时间出现）：
@@ -375,6 +375,8 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
 
 `GET /plugin/dsh-transfer-dock/state` 返回一份只读 JSON 快照（`cache-control: no-store`）：
 
+路由会先调用 `ctx.connection.requestRejection(request)`：非 DSH 页面（跨站网页或缺少同源认证的请求）会得到 401 / 403，只有 DSH 自己的浏览器页面能读取状态。
+
 ```json
 {
   "version": 1,
@@ -397,7 +399,7 @@ curl.exe -L -# --limit-rate 300k -o "$env:TEMP\probe.bin" `
       "source": "temp"
     }
   ],
-  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.1" }
+  "poll": { "hits": 412, "lastHitAt": 1731427200000, "build": "0.1.2" }
 }
 ```
 

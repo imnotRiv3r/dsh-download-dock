@@ -14,8 +14,8 @@ import { DownloadTracker } from './lib/tracker.js'
 /** 状态路由；浏览器半用同一常量拼 URL。 */
 export const STATE_PATH = '/plugin/dsh-transfer-dock/state'
 
-/** 只需要 job 注册表；提示词与 HTTP 路由都是可选增强。 */
-export const inject = ['jobs']
+/** 需要 job 注册表与连接服务；后者用来拒绝非 DSH 来源的 HTTP 请求。 */
+export const inject = ['jobs', 'connection']
 
 /**
  * 行配置。全部 `volatile()`，这样插件面板能渲染出可编辑表单。
@@ -117,7 +117,7 @@ function installStateRoute(ctx, tracker) {
   let attempts = 0
   let timer
   // 浏览器半每 600ms 轮询一次；计数用来判断它到底有没有挂载。
-  const stats = { hits: 0, lastHitAt: 0, build: '0.1.1' }
+  const stats = { hits: 0, lastHitAt: 0, build: '0.1.2' }
 
   const attempt = () => {
     if (dispose !== undefined) return
@@ -128,6 +128,13 @@ function installStateRoute(ctx, tracker) {
           kind: 'exact',
           path: STATE_PATH,
           resource: request => {
+            // 只把状态交给 DSH 自己的页面：跨站网页不能借本地端口读取任务信息。
+            const connection = ctx.get('connection')
+            const refused =
+              connection !== undefined && connection !== null && typeof connection.requestRejection === 'function'
+                ? connection.requestRejection(request)
+                : undefined
+            if (refused !== undefined) return new Response(null, { status: refused })
             stats.hits += 1
             stats.lastHitAt = Date.now()
             try {
